@@ -32,7 +32,10 @@ function scrapeSheets() {
       console.log(currsheet + " is empty")
       continue;
     }
-    var rowsData = getRowsData_(currsheet);
+
+    var compressmeta = getMetaData_(currsheet);
+
+    var rowsData = compressmeta.concat(getRowsData_(currsheet));
     var sheetName = currsheet.getName(); 
     sheetsData[sheetName] = rowsData;
     var json = makeJSON_(sheetsData);
@@ -40,6 +43,14 @@ function scrapeSheets() {
     sheetsData = {};
   } 
   displayText_(json);
+}
+
+function getMetaData_(sheet) {
+  var headersRange = sheet.getRange(findRow(sheet, "Item")+1, 1, 7, 1);
+  var headers = headersRange.getValues();
+  var dataRange = sheet.getRange(findRow(sheet, "Description")+1, 2, 7, 1);
+  var objects = getMetaObjects_(dataRange.getValues(), normalizeHeaders_(headers));
+  return objects;
 }
 
 function getRowsData_(sheet) {
@@ -53,6 +64,26 @@ function getRowsData_(sheet) {
 function makeJSON_(object) {
   var jsonString = JSON.stringify(object, null, 4);
   return jsonString;
+}
+
+function getMetaObjects_(data, keys) {
+  var objects = [];
+  for (var i = 0; i < data.length; ++i) {
+    var object = {};
+    var hasData = false;
+    for (var j = 0; j < data[i].length; ++j) {
+      var cellData = data[i][j];
+      if (isCellEmpty_(cellData)) {
+        continue;
+      }
+      object[keys[i]] = cellData;
+      hasData = true;
+    }
+    if (hasData) {
+      objects.push(object);
+    }
+  }
+  return objects;
 }
 
 function getObjects_(data, keys) {
