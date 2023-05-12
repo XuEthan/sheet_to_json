@@ -1,4 +1,4 @@
-Convert google sheets to json files using app scritp 
+Convert google sheets to json files using app script
 
 WIP 
 
